@@ -10,6 +10,7 @@ import 'package:rakt_pravah/logic/cubit/main_cubit.dart';
 import 'package:rakt_pravah/presentation/pages/auth/registor_details.dart';
 import 'package:rakt_pravah/presentation/pages/home/home_page.dart';
 import 'package:rakt_pravah/presentation/pages/other/about_us.dart';
+import 'package:rakt_pravah/presentation/pages/other/my_profile_screen.dart';
 import 'package:rakt_pravah/presentation/pages/other/privacy_prolicy.dart';
 import 'package:rakt_pravah/presentation/pages/other/terms_conditions.dart';
 import 'package:rakt_pravah/presentation/pages/splash_screen.dart';

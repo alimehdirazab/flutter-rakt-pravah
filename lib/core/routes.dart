@@ -4,6 +4,7 @@ import 'package:rakt_pravah/presentation/pages/auth/registor_details.dart';
 import 'package:rakt_pravah/presentation/pages/auth/sign_in_screen.dart';
 import 'package:rakt_pravah/presentation/pages/home/home_page.dart';
 import 'package:rakt_pravah/presentation/pages/other/about_us.dart';
+import 'package:rakt_pravah/presentation/pages/other/my_profile_screen.dart';
 import 'package:rakt_pravah/presentation/pages/other/privacy_prolicy.dart';
 import 'package:rakt_pravah/presentation/pages/other/terms_conditions.dart';
 import 'package:rakt_pravah/presentation/pages/splash_screen.dart';
@@ -51,6 +52,11 @@ class Routes {
       case HomePage.routeName:
         return CupertinoPageRoute(
           builder: (context) => const HomePage(),
+        );
+
+      case MyProfileScreen.routeName:
+        return CupertinoPageRoute(
+          builder: (context) => const MyProfileScreen(),
         );
 
       default:

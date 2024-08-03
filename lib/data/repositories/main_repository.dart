@@ -6,6 +6,7 @@ import 'package:rakt_pravah/data/models/register_response.dart';
 import 'package:rakt_pravah/data/models/verify_otp_response.dart';
 import 'package:rakt_pravah/data/models/terms_conditions_response.dart';
 import 'package:rakt_pravah/data/models/banner_response.dart';
+import 'package:rakt_pravah/logic/services/app_config.dart';
 
 class MainRepository {
   final Api api;
@@ -53,6 +54,7 @@ class MainRepository {
 
           // Use the token as needed (e.g., store it for future requests)
           final token = otpResponse.token;
+          AppConfig.userToken = token!;
           print('Token: $token');
 
           return otpResponse;
