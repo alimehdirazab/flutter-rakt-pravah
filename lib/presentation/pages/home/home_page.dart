@@ -7,6 +7,7 @@ import 'package:rakt_pravah/presentation/pages/home/donate_screen.dart';
 import 'package:rakt_pravah/presentation/pages/other/about_us.dart';
 import 'package:rakt_pravah/presentation/pages/other/my_profile_screen.dart';
 import 'package:rakt_pravah/presentation/pages/other/privacy_prolicy.dart';
+import 'package:rakt_pravah/presentation/pages/other/request_screen.dart';
 import 'package:rakt_pravah/presentation/pages/other/terms_conditions.dart';
 import 'package:rakt_pravah/presentation/widgets/drawer_tile.dart';
 import 'package:rakt_pravah/presentation/widgets/gap_widget.dart';
@@ -24,7 +25,7 @@ class _HomePageState extends State<HomePage> {
   int currentIndex = 0;
   List<Widget> screens = const [
     DashboardScreen(),
-    DonateScreen(),
+    RequestScreen(),
     RequestForBloodScreen(),
   ];
 
@@ -108,7 +109,13 @@ class _HomePageState extends State<HomePage> {
                   Navigator.pushNamed(context, AboutUs.routeName);
                 },
               ),
-              const DrawerTile(icon: Icons.add_to_queue, title: 'Requests'),
+              DrawerTile(
+                icon: Icons.add_to_queue,
+                title: 'Requests',
+                onTap: () {
+                  Navigator.pushNamed(context, RequestScreen.routeName);
+                },
+              ),
               const DrawerTile(icon: Icons.history, title: 'Donate History'),
               DrawerTile(
                 icon: Icons.menu_book,

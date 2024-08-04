@@ -1,14 +1,22 @@
+// dashboard_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:rakt_pravah/core/ui.dart';
+import 'package:rakt_pravah/data/models/banner_response.dart';
+import 'package:rakt_pravah/logic/cubit/banner%20cubit/banner_cubit.dart';
+import 'package:rakt_pravah/logic/cubit/banner%20cubit/banner_state.dart';
 import 'package:rakt_pravah/logic/cubit/main_cubit.dart';
 import 'package:rakt_pravah/logic/cubit/main_states.dart';
-import 'package:rakt_pravah/data/models/banner_response.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:rakt_pravah/logic/cubit/profile%20cubit/profile_cubit.dart';
+import 'package:rakt_pravah/logic/cubit/profile%20cubit/profile_states.dart';
 import 'package:rakt_pravah/presentation/widgets/dashboard_card.dart';
 import 'package:rakt_pravah/presentation/widgets/gap_widget.dart';
 import 'package:rakt_pravah/presentation/widgets/requests_card.dart';
 import 'package:rakt_pravah/presentation/widgets/smart_saver_card.dart';
+import 'package:rakt_pravah/data/models/profile_response.dart';
+import 'package:rakt_pravah/data/models/blood_request_list_response.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -19,12 +27,21 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   late MainCubit _mainCubit;
+  late BannerCubit _bannerCubit;
+  late ProfileCubit _profile;
+  ProfileResponse? _profileResponse;
+  BloodRequestListResponse? _bloodRequestListResponse;
 
   @override
   void initState() {
     super.initState();
     _mainCubit = BlocProvider.of<MainCubit>(context);
-    _mainCubit.fetchBanner();
+    _bannerCubit = BlocProvider.of<BannerCubit>(context);
+    _profile = BlocProvider.of<ProfileCubit>(context);
+    //////////////////////////
+    _profile.getProfileDetails();
+    _bannerCubit.fetchBanner();
+    _mainCubit.getBloodRequestList();
   }
 
   @override
@@ -36,23 +53,38 @@ class _DashboardScreenState extends State<DashboardScreen> {
         backgroundColor: AppColors.primaryColor,
         leading: IconButton(
           onPressed: () {
-            // Use Scaffold.of(context) to open the Drawer
-            // Ensure the widget is wrapped in a Builder
             Scaffold.of(context).openDrawer();
           },
           icon: const Icon(Icons.list, size: 30),
         ),
         titleSpacing: 0,
-        title: const Row(
+        title: Row(
           children: [
-            Icon(
+            const Icon(
               Icons.account_circle_rounded,
               color: Colors.white,
               size: 28,
             ),
-            Text(
-              '   Welcome Anuj',
-              style: TextStyle(color: Colors.white, fontSize: 14),
+            BlocBuilder<ProfileCubit, ProfileState>(
+              builder: (context, state) {
+                if (state is ProfileSuccess) {
+                  _profileResponse = state.profileResponse;
+                  print('Profile data: ${_profileResponse?.data}');
+                  return Text(
+                    '   Welcome ${_profileResponse?.data.name ?? 'User'}',
+                    style: const TextStyle(color: Colors.white, fontSize: 14),
+                  );
+                } else if (state is ProfileError) {
+                  return Text(
+                    'Error: ${state.errorMessage}',
+                    style: const TextStyle(color: Colors.white, fontSize: 14),
+                  );
+                }
+                return const Text(
+                  '   Loading...',
+                  style: TextStyle(color: Colors.white, fontSize: 14),
+                );
+              },
             ),
           ],
         ),
@@ -77,13 +109,29 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     color: AppColors.primaryColor,
                   ),
                 ),
-                const SmartSaverCard(
-                  userId: '123444',
-                  bloodGroup: 'B+',
+                BlocBuilder<ProfileCubit, ProfileState>(
+                  builder: (context, state) {
+                    if (state is ProfileSuccess) {
+                      _profileResponse = state.profileResponse;
+                      return SmartSaverCard(
+                        userId: _profileResponse?.data.id.toString() ?? 'N/A',
+                        bloodGroup: _profileResponse?.data.bloodGroup ?? 'N/A',
+                      );
+                    } else if (state is ProfileError) {
+                      return const SmartSaverCard(
+                        userId: 'Error',
+                        bloodGroup: 'Error',
+                      );
+                    }
+                    return const SmartSaverCard(
+                      userId: 'Loading...',
+                      bloodGroup: 'Loading...',
+                    );
+                  },
                 ),
               ],
             ),
-            BlocBuilder<MainCubit, MainState>(
+            BlocBuilder<BannerCubit, BannerState>(
               builder: (context, state) {
                 if (state is BannerLoadingState) {
                   return const Center(child: CircularProgressIndicator());
@@ -110,29 +158,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
             const GapWidget(),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    RequestsCard(
-                      bloodGroup: 'B+',
-                      name: 'Ali Mehdi Raza',
-                      units: '1 Units (Platelets)',
-                      address: 'Sultan Abad Karachi',
-                      date: 'Friday, Aug 20',
-                    ),
-                    GapWidget(),
-                    RequestsCard(
-                      bloodGroup: 'B+',
-                      name: 'Ali Mehdi Raza',
-                      units: '1 Units (Platelets)',
-                      address: 'Sultan Abad Karachi',
-                      date: 'Friday, Aug 20',
-                    ),
-                  ],
-                ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: BlocBuilder<MainCubit, MainState>(
+                builder: (context, state) {
+                  if (state is BloodRequestListLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (state is BloodRequestListSuccess) {
+                    _bloodRequestListResponse = state.bloodRequestListResponse;
+                    return _buildBloodRequestListUI(
+                        _bloodRequestListResponse?.data ?? []);
+                  } else if (state is BloodRequestListError) {
+                    return Center(child: Text('Error: ${state.errorMessage}'));
+                  }
+                  return Container();
+                },
               ),
             ),
           ],
@@ -151,6 +191,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
           width: MediaQuery.of(context).size.width * 0.9,
           height: 130,
         ),
+      ),
+    );
+  }
+
+  Widget _buildBloodRequestListUI(List<BloodRequestList> requests) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: requests.map((request) {
+          return RequestsCard(
+            bloodGroup: request.bloodGroup!,
+            name: '${request.patientFirstName} ${request.patientLastName}',
+            units: '${request.numberOfUnits} Units (${request.requestType})',
+            address: request.locationForDonation ?? "N/A",
+            date: request.requiredDate!,
+          );
+        }).toList(),
       ),
     );
   }

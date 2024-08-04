@@ -6,7 +6,9 @@ import 'package:rakt_pravah/core/api.dart';
 import 'package:rakt_pravah/core/routes.dart';
 import 'package:rakt_pravah/core/ui.dart';
 import 'package:rakt_pravah/data/repositories/main_repository.dart';
+import 'package:rakt_pravah/logic/cubit/banner%20cubit/banner_cubit.dart';
 import 'package:rakt_pravah/logic/cubit/main_cubit.dart';
+import 'package:rakt_pravah/logic/cubit/profile%20cubit/profile_cubit.dart';
 import 'package:rakt_pravah/presentation/pages/auth/registor_details.dart';
 import 'package:rakt_pravah/presentation/pages/home/home_page.dart';
 import 'package:rakt_pravah/presentation/pages/other/about_us.dart';
@@ -28,13 +30,15 @@ class MyApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (context) => MainCubit(MainRepository(Api()))),
+        BlocProvider(create: (context) => BannerCubit(MainRepository(Api()))),
+        BlocProvider(create: (context) => ProfileCubit(MainRepository(Api()))),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Rakt Pravah',
         theme: Themes.defaultTheme,
         onGenerateRoute: Routes.onGenerateRoutes,
-        initialRoute: SplashScreen.routeName,
+        initialRoute: HomePage.routeName,
       ),
     );
   }

@@ -1,4 +1,6 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:rakt_pravah/data/models/blood_request_list_response.dart';
 import 'package:rakt_pravah/data/repositories/main_repository.dart';
 import 'package:rakt_pravah/logic/cubit/main_states.dart';
 
@@ -110,14 +112,27 @@ class MainCubit extends Cubit<MainState> {
     }
   }
 
-  Future<void> fetchBanner() async {
-    emit(BannerLoadingState());
+  Future<void> getBloodRequestList() async {
+    emit(BloodRequestListLoading());
 
     try {
-      final response = await mainRepository.fetchBanner();
-      emit(BannerSuccessState(response));
+      final response = await mainRepository.fetchBloodRequestList();
+      emit(BloodRequestListSuccess(response));
     } catch (e) {
-      emit(BannerFailureState(e.toString()));
+      emit(BloodRequestListError(
+          'Failed to fetch BloodRequestList details: $e'));
+    }
+  }
+
+  Future<void> getAcceptedBloodRequestList() async {
+    emit(AcceptedBloodRequestListLoading());
+
+    try {
+      final response = await mainRepository.fetchAcceptedBloodRequestList();
+      emit(AcceptedBloodRequestListSuccess(response));
+    } catch (e) {
+      emit(AcceptedBloodRequestListError(
+          'Failed to fetch Accepted BloodRequestList details: $e'));
     }
   }
 }

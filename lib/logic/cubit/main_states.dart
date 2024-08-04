@@ -1,6 +1,8 @@
 import 'package:rakt_pravah/data/models/about_us_response.dart';
 import 'package:rakt_pravah/data/models/banner_response.dart';
+import 'package:rakt_pravah/data/models/blood_request_list_response.dart';
 import 'package:rakt_pravah/data/models/otp_reponse.dart';
+import 'package:rakt_pravah/data/models/profile_response.dart';
 import 'package:rakt_pravah/data/models/register_response.dart';
 import 'package:rakt_pravah/data/models/terms_conditions_response.dart';
 import 'package:rakt_pravah/data/models/verify_otp_response.dart';
@@ -102,18 +104,34 @@ class RegisterFailureState extends MainState {
   RegisterFailureState(this.error);
 }
 
-//////////////////////////////////////////////////
+//////////////////////////////////////////////
 
-class BannerLoadingState extends MainState {}
+class BloodRequestListLoading extends MainState {}
 
-class BannerSuccessState extends MainState {
-  final BannerResponse response;
+class BloodRequestListSuccess extends MainState {
+  final BloodRequestListResponse bloodRequestListResponse;
 
-  BannerSuccessState(this.response);
+  BloodRequestListSuccess(this.bloodRequestListResponse);
 }
 
-class BannerFailureState extends MainState {
-  final String error;
+class BloodRequestListError extends MainState {
+  final String errorMessage;
 
-  BannerFailureState(this.error);
+  BloodRequestListError(this.errorMessage);
+}
+
+//////////////////////////////////////////////////////
+
+class AcceptedBloodRequestListLoading extends MainState {}
+
+class AcceptedBloodRequestListSuccess extends MainState {
+  final BloodRequestListResponse bloodRequestListResponse;
+
+  AcceptedBloodRequestListSuccess(this.bloodRequestListResponse);
+}
+
+class AcceptedBloodRequestListError extends MainState {
+  final String errorMessage;
+
+  AcceptedBloodRequestListError(this.errorMessage);
 }

@@ -1,7 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:rakt_pravah/core/api.dart';
 import 'package:rakt_pravah/data/models/about_us_response.dart';
+import 'package:rakt_pravah/data/models/blood_request_list_response.dart';
 import 'package:rakt_pravah/data/models/otp_reponse.dart';
+import 'package:rakt_pravah/data/models/profile_response.dart';
 import 'package:rakt_pravah/data/models/register_response.dart';
 import 'package:rakt_pravah/data/models/verify_otp_response.dart';
 import 'package:rakt_pravah/data/models/terms_conditions_response.dart';
@@ -54,8 +56,11 @@ class MainRepository {
 
           // Use the token as needed (e.g., store it for future requests)
           final token = otpResponse.token;
-          AppConfig.userToken = token!;
+          final id = otpResponse.data?.id;
+          AppConfig.userToken = token;
+          AppConfig.id = id;
           print('Token: $token');
+          print('Id: $id');
 
           return otpResponse;
         } else {
@@ -187,6 +192,130 @@ class MainRepository {
         return BannerResponse.fromJson(response.data);
       } else {
         throw Exception('Failed to fetch banner');
+      }
+    } catch (e) {
+      throw Exception('Error: $e');
+    }
+  }
+
+  Future<ProfileResponse> fetchProfileDetails() async {
+    try {
+      int id = AppConfig.id!;
+      String token = AppConfig.userToken!;
+      final response = await api.sendRequest.get(
+        'profile',
+        queryParameters: {'user_id': id},
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        return ProfileResponse.fromJson(response.data);
+      } else {
+        throw Exception('Failed to fetch profile details');
+      }
+    } catch (e) {
+      throw Exception('Error: $e');
+    }
+  }
+
+  Future<BloodRequestListResponse> fetchBloodRequestList() async {
+    try {
+      int id = AppConfig.id!;
+      String token = AppConfig.userToken!;
+      final response = await api.sendRequest.get(
+        'blood-request-list',
+        queryParameters: {'user_id': id},
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        return BloodRequestListResponse.fromJson(response.data);
+      } else {
+        throw Exception('Failed to fetch profile details');
+      }
+    } catch (e) {
+      throw Exception('Error: $e');
+    }
+  }
+
+  Future<BloodRequestListResponse> fetchAcceptedBloodRequestList() async {
+    try {
+      int id = AppConfig.id!;
+      String token = AppConfig.userToken!;
+      final response = await api.sendRequest.get(
+        'accepted-blood-request-list',
+        queryParameters: {'user_id': id},
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        return BloodRequestListResponse.fromJson(response.data);
+      } else {
+        throw Exception('Failed to fetch profile details');
+      }
+    } catch (e) {
+      throw Exception('Error: $e');
+    }
+  }
+
+  Future<String?> createBloodRequest({
+    required String patientFirstName,
+    required String patientLastName,
+    required String attendeeFirstName,
+    required String attendeeLastName,
+    required String attendeeMobile,
+    required String bloodGroup,
+    required String requestType,
+    required int numberOfUnits,
+    required String requiredDate,
+    required String requisitionDoctor,
+    required String locationForDonation,
+    required String hospitalName,
+    required bool isCritical,
+  }) async {
+    try {
+      final response = await api.sendRequest.post(
+        'blood-request',
+        data: FormData.fromMap({
+          'user_id': AppConfig.id,
+          'patient_f_name': patientFirstName,
+          'patient_l_name': patientLastName,
+          'attendee_f_name': attendeeFirstName,
+          'attendee_l_name': attendeeLastName,
+          'attendee_mobile': attendeeMobile,
+          'blood_group': bloodGroup,
+          'request_type': requestType,
+          'no_of_units': numberOfUnits,
+          'required_date': requiredDate,
+          'requisition_doctor': requisitionDoctor,
+          'location_for_donation': locationForDonation,
+          'hospital_name': hospitalName,
+          'is_critical': isCritical ? 'yes' : 'no',
+        }),
+        options: Options(
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Authorization': 'Bearer ${AppConfig.userToken!}',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        return response.statusMessage;
+      } else {
+        throw Exception('Failed to create blood request');
       }
     } catch (e) {
       throw Exception('Error: $e');

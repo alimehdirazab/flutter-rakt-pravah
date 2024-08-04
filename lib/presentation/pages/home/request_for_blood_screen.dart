@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:rakt_pravah/core/api.dart';
 import 'package:rakt_pravah/core/ui.dart';
+import 'package:rakt_pravah/data/repositories/main_repository.dart';
 import 'package:rakt_pravah/presentation/pages/other/privacy_prolicy.dart';
 import 'package:rakt_pravah/presentation/pages/other/terms_conditions.dart';
 import 'package:rakt_pravah/presentation/widgets/custom_dialog_box.dart';
@@ -22,8 +24,12 @@ class _RequestForBloodScreenState extends State<RequestForBloodScreen> {
   final TextEditingController _attendeeMobileController =
       TextEditingController();
   final TextEditingController _locationController = TextEditingController();
+  final TextEditingController _requisitionDoctorController =
+      TextEditingController();
+  final TextEditingController _hospitalNameController = TextEditingController();
   final TextEditingController _additionalNoteController =
       TextEditingController();
+  final MainRepository mainRepository = MainRepository(Api());
 
   String? _selectedBloodType;
   String? _selectedBloodGroup;
@@ -31,6 +37,7 @@ class _RequestForBloodScreenState extends State<RequestForBloodScreen> {
   DateTime? _selectedDate;
   bool _isCritical = false;
   bool _agreedToTerms = false;
+  bool _isLoading = false;
 
   final _formKey = GlobalKey<FormState>();
 
@@ -39,6 +46,8 @@ class _RequestForBloodScreenState extends State<RequestForBloodScreen> {
     _patientNameController.dispose();
     _attendeeMobileController.dispose();
     _locationController.dispose();
+    _requisitionDoctorController.dispose();
+    _hospitalNameController.dispose();
     _additionalNoteController.dispose();
     super.dispose();
   }
@@ -55,6 +64,70 @@ class _RequestForBloodScreenState extends State<RequestForBloodScreen> {
         );
       },
     );
+  }
+
+  Future<void> _handleFormSubmission() async {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
+
+      // Collect form data
+      final patientName = _patientNameController.text.split(' ');
+      final attendeeName = _attendeeMobileController.text.split(' ');
+      final requestType = _selectedBloodType ?? '';
+      final bloodGroup = _selectedBloodGroup ?? '';
+      final numberOfUnits =
+          int.tryParse(_selectedUnits?.split(' ')[0] ?? '0') ?? 0;
+      final requiredDate = _selectedDate != null
+          ? '${_selectedDate!.year}-${_selectedDate!.month}-${_selectedDate!.day}'
+          : '';
+      final requisitionDoctor = _requisitionDoctorController.text;
+      final locationForDonation = _locationController.text;
+      final hospitalName = _hospitalNameController.text;
+
+      try {
+        final result = await mainRepository.createBloodRequest(
+          patientFirstName: patientName[0],
+          patientLastName: patientName.length > 1 ? patientName[1] : '',
+          attendeeFirstName: attendeeName[0],
+          attendeeLastName: attendeeName.length > 1 ? attendeeName[1] : '',
+          attendeeMobile: _attendeeMobileController.text,
+          bloodGroup: bloodGroup,
+          requestType: requestType,
+          numberOfUnits: numberOfUnits,
+          requiredDate: requiredDate,
+          requisitionDoctor: requisitionDoctor,
+          locationForDonation: locationForDonation,
+          hospitalName: hospitalName,
+          isCritical: _isCritical,
+        );
+
+        // Show success dialog
+        _showCustomDialog(
+          context,
+          'Request Sent',
+          'Your blood request has been successfully sent.',
+          () {
+            Navigator.pop(context);
+          },
+        );
+      } catch (e) {
+        // Handle errors
+        _showCustomDialog(
+          context,
+          'Error',
+          'There was an error sending your request. Please try again later.',
+          () {
+            Navigator.pop(context);
+          },
+        );
+      } finally {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -80,15 +153,12 @@ class _RequestForBloodScreenState extends State<RequestForBloodScreen> {
                 DropdownButtonFormField<String>(
                   decoration: const InputDecoration(
                     hintText: 'Select Blood Type',
-                    contentPadding: EdgeInsets.symmetric(
-                      vertical: 15,
-                      horizontal: 10,
-                    ),
+                    contentPadding:
+                        EdgeInsets.symmetric(vertical: 15, horizontal: 10),
                   ),
                   value: _selectedBloodType,
                   items: const [
                     DropdownMenuItem(value: 'Blood', child: Text('Blood')),
-
                     // Add other blood types if needed
                   ],
                   onChanged: (value) {
@@ -135,89 +205,33 @@ class _RequestForBloodScreenState extends State<RequestForBloodScreen> {
                 DropdownButtonFormField<String>(
                   decoration: const InputDecoration(
                     hintText: 'Select Blood Group',
-                    contentPadding: EdgeInsets.symmetric(
-                      vertical: 15,
-                      horizontal: 10,
-                    ),
+                    contentPadding:
+                        EdgeInsets.symmetric(vertical: 15, horizontal: 10),
                   ),
                   value: _selectedBloodGroup,
                   items: const [
+                    DropdownMenuItem(value: 'A+', child: Text('A+')),
+                    DropdownMenuItem(value: 'A-', child: Text('A-')),
+                    DropdownMenuItem(value: 'B+', child: Text('B+')),
+                    DropdownMenuItem(value: 'B-', child: Text('B-')),
+                    DropdownMenuItem(value: 'AB+', child: Text('AB+')),
+                    DropdownMenuItem(value: 'AB-', child: Text('AB-')),
+                    DropdownMenuItem(value: 'O+', child: Text('O+')),
+                    DropdownMenuItem(value: 'O-', child: Text('O-')),
+                    DropdownMenuItem(value: 'A1+', child: Text('A1+')),
+                    DropdownMenuItem(value: 'A1-', child: Text('A1-')),
+                    DropdownMenuItem(value: 'A2+', child: Text('A2+')),
+                    DropdownMenuItem(value: 'A2-', child: Text('A2-')),
+                    DropdownMenuItem(value: 'A1B+', child: Text('A1B+')),
+                    DropdownMenuItem(value: 'A1B-', child: Text('A1B-')),
+                    DropdownMenuItem(value: 'A2B+', child: Text('A2B+')),
+                    DropdownMenuItem(value: 'A2B-', child: Text('A2B-')),
                     DropdownMenuItem(
-                      value: 'A+',
-                      child: Text('A+'),
-                    ),
+                        value: 'Bombay Blood Group',
+                        child: Text('Bombay Blood Group')),
+                    DropdownMenuItem(value: 'INRA', child: Text('INRA')),
                     DropdownMenuItem(
-                      value: 'A-',
-                      child: Text('A-'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'B+',
-                      child: Text('B+'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'B-',
-                      child: Text('B-'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'AB+',
-                      child: Text('AB+'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'AB-',
-                      child: Text('AB-'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'O+',
-                      child: Text('O+'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'O-',
-                      child: Text('O-'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'A1+',
-                      child: Text('A1+'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'A1-',
-                      child: Text('A1-'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'A2+',
-                      child: Text('A2+'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'A2-',
-                      child: Text('A2-'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'A1B+',
-                      child: Text('A1B+'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'A1B-',
-                      child: Text('A1B-'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'A2B+',
-                      child: Text('A2B+'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'A2B-',
-                      child: Text('A2B='),
-                    ),
-                    DropdownMenuItem(
-                      value: 'Bombay Blood Group',
-                      child: Text('Bombay Blood Group'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'INRA',
-                      child: Text('INRA'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'Don\'t Known',
-                      child: Text('Don\'t Known'),
-                    ),
+                        value: 'Don\'t Known', child: Text('Don\'t Known')),
                   ],
                   onChanged: (value) {
                     setState(() {
@@ -262,7 +276,7 @@ class _RequestForBloodScreenState extends State<RequestForBloodScreen> {
                     }
                   },
                   child: PrimaryTextField(
-                    hintText: 'Require Date',
+                    hintText: 'Required Date',
                     icon: Icons.date_range,
                     controller: TextEditingController(
                       text: _selectedDate != null
@@ -282,10 +296,8 @@ class _RequestForBloodScreenState extends State<RequestForBloodScreen> {
                 DropdownButtonFormField<String>(
                   decoration: const InputDecoration(
                     hintText: 'Select Units',
-                    contentPadding: EdgeInsets.symmetric(
-                      vertical: 15,
-                      horizontal: 10,
-                    ),
+                    contentPadding:
+                        EdgeInsets.symmetric(vertical: 15, horizontal: 10),
                   ),
                   value: _selectedUnits,
                   items: const [
@@ -314,6 +326,30 @@ class _RequestForBloodScreenState extends State<RequestForBloodScreen> {
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please select your location';
+                    }
+                    return null;
+                  },
+                ),
+                const GapWidget(),
+                PrimaryTextField(
+                  hintText: 'Requisition Doctor',
+                  icon: Icons.person,
+                  controller: _requisitionDoctorController,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter the requisition doctor';
+                    }
+                    return null;
+                  },
+                ),
+                const GapWidget(),
+                PrimaryTextField(
+                  hintText: 'Hospital Name',
+                  icon: Icons.local_hospital,
+                  controller: _hospitalNameController,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter the hospital name';
                     }
                     return null;
                   },
@@ -381,23 +417,12 @@ class _RequestForBloodScreenState extends State<RequestForBloodScreen> {
                   ],
                 ),
                 const GapWidget(size: 10),
-                PrimaryButton(
-                  text: 'Send Request',
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      // Handle the form submission
-                      // For example, you might send the data to an API or Cubit
-                      _showCustomDialog(
-                        context,
-                        'Request Sent',
-                        'Your blood request has been successfully sent.',
-                        () {
-                          Navigator.pop(context);
-                        },
-                      );
-                    }
-                  },
-                ),
+                _isLoading
+                    ? CircularProgressIndicator()
+                    : PrimaryButton(
+                        text: 'Send Request',
+                        onPressed: _handleFormSubmission,
+                      ),
               ],
             ),
           ),
