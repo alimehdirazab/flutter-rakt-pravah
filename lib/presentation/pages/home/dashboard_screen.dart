@@ -1,5 +1,4 @@
 // dashboard_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/cupertino.dart';
@@ -11,6 +10,8 @@ import 'package:rakt_pravah/logic/cubit/main_cubit.dart';
 import 'package:rakt_pravah/logic/cubit/main_states.dart';
 import 'package:rakt_pravah/logic/cubit/profile%20cubit/profile_cubit.dart';
 import 'package:rakt_pravah/logic/cubit/profile%20cubit/profile_states.dart';
+import 'package:rakt_pravah/presentation/pages/home/request_for_blood_screen.dart';
+import 'package:rakt_pravah/presentation/pages/other/request_screen.dart';
 import 'package:rakt_pravah/presentation/widgets/dashboard_card.dart';
 import 'package:rakt_pravah/presentation/widgets/gap_widget.dart';
 import 'package:rakt_pravah/presentation/widgets/requests_card.dart';
@@ -20,6 +21,7 @@ import 'package:rakt_pravah/data/models/blood_request_list_response.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
+  static const String routeName = 'DashboardPage';
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
@@ -114,7 +116,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     if (state is ProfileSuccess) {
                       _profileResponse = state.profileResponse;
                       return SmartSaverCard(
-                        userId: _profileResponse?.data.id.toString() ?? 'N/A',
+                        userId:
+                            _profileResponse?.data.uniqueId.toString() ?? 'N/A',
                         bloodGroup: _profileResponse?.data.bloodGroup ?? 'N/A',
                       );
                     } else if (state is ProfileError) {
@@ -134,7 +137,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             BlocBuilder<BannerCubit, BannerState>(
               builder: (context, state) {
                 if (state is BannerLoadingState) {
-                  return const Center(child: CircularProgressIndicator());
+                  // return const Center(child: CircularProgressIndicator());
                 } else if (state is BannerSuccessState) {
                   return _buildBannerUI(state.response.data);
                 } else if (state is BannerFailureState) {
@@ -144,16 +147,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
               },
             ),
             const GapWidget(),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Row(
                 children: [
                   DashboardCard(
-                      image: 'assets/icons/icon-1.png',
-                      title: 'Request for Blood'),
-                  GapWidget(),
+                    image: 'assets/icons/icon-1.png',
+                    title: 'Request for Blood',
+                    onTap: () {
+                      // Navigate to request blood page
+                      Navigator.pushNamed(
+                          context, RequestForBloodScreen.routeName);
+                    },
+                  ),
+                  const GapWidget(),
                   DashboardCard(
-                      image: 'assets/icons/icon-2.png', title: 'Donate Blood'),
+                    image: 'assets/icons/icon-2.png',
+                    title: 'Donate Blood',
+                    onTap: () {
+                      // Navigate to donate blood page
+                      Navigator.pushNamed(context, RequestScreen.routeName);
+                    },
+                  ),
                 ],
               ),
             ),
@@ -163,7 +178,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               child: BlocBuilder<MainCubit, MainState>(
                 builder: (context, state) {
                   if (state is BloodRequestListLoading) {
-                    return const Center(child: CircularProgressIndicator());
+                    // return const Center(child: CircularProgressIndicator());
                   } else if (state is BloodRequestListSuccess) {
                     _bloodRequestListResponse = state.bloodRequestListResponse;
                     return _buildBloodRequestListUI(
@@ -189,7 +204,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           banner.image,
           fit: BoxFit.cover,
           width: MediaQuery.of(context).size.width * 0.9,
-          height: 130,
+          height: 150,
         ),
       ),
     );
@@ -201,7 +216,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: Row(
         children: requests.map((request) {
           return RequestsCard(
-            bloodGroup: request.bloodGroup!,
+            bloodGroup: request.bloodGroup ?? "NA",
             name: '${request.patientFirstName} ${request.patientLastName}',
             units: '${request.numberOfUnits} Units (${request.requestType})',
             address: request.locationForDonation ?? "N/A",

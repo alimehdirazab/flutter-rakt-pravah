@@ -4,6 +4,7 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:rakt_pravah/logic/cubit/main_cubit.dart';
 import 'package:rakt_pravah/logic/cubit/main_states.dart';
 import 'package:rakt_pravah/core/ui.dart';
+import 'package:rakt_pravah/presentation/pages/home/home_page.dart';
 
 class PrivacyPolicy extends StatefulWidget {
   const PrivacyPolicy({super.key});
@@ -22,55 +23,69 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Privacy Policy'),
-        backgroundColor: AppColors.primaryColor,
-      ),
-      body: BlocBuilder<MainCubit, MainState>(
-        builder: (context, state) {
-          if (state is PrivacyPolicyLoadingState) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (state is PrivacyPolicySuccessState) {
-            return ListView.builder(
-              itemCount: state.response.data.length,
-              itemBuilder: (context, index) {
-                final policyData = state.response.data[index];
-                return Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+    return WillPopScope(
+      onWillPop: () async {
+        Navigator.of(context).pushNamedAndRemoveUntil(
+          HomePage.routeName,
+          (route) => false,
+        );
+        return false;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Privacy Policy'),
+          backgroundColor: AppColors.primaryColor,
+        ),
+        body: BlocBuilder<MainCubit, MainState>(
+          builder: (context, state) {
+            if (state is PrivacyPolicyLoadingState) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (state is PrivacyPolicySuccessState) {
+              return ListView.builder(
+                itemCount: state.response.data.length,
+                itemBuilder: (context, index) {
+                  final policyData = state.response.data[index];
+                  return Column(
                     children: [
-                      Text(
-                        policyData.title,
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                      Image.asset('assets/images/About_banner.png'),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              policyData.title,
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            // Use the Html widget to render HTML content
+                            Html(
+                              data: policyData.description,
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      // Use the Html widget to render HTML content
-                      Html(
-                        data: policyData.description,
-                      ),
                     ],
+                  );
+                },
+              );
+            } else if (state is PrivacyPolicyFailureState) {
+              return Center(
+                child: Text(
+                  'Error: ${state.error}',
+                  style: const TextStyle(
+                    color: Colors.red,
                   ),
-                );
-              },
-            );
-          } else if (state is PrivacyPolicyFailureState) {
-            return Center(
-              child: Text(
-                'Error: ${state.error}',
-                style: const TextStyle(
-                  color: Colors.red,
                 ),
-              ),
-            );
-          } else {
-            return Container();
-          }
-        },
+              );
+            } else {
+              return Container();
+            }
+          },
+        ),
       ),
     );
   }

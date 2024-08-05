@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:rakt_pravah/presentation/pages/after_splash_screen.dart';
 import 'package:rakt_pravah/presentation/pages/auth/sign_in_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -27,7 +28,7 @@ class _SplashScreenState extends State<SplashScreen> {
         statusBarColor: Colors.transparent,
       ),
     );
-    Navigator.pushReplacementNamed(context, SignInScreen.routeName);
+    Navigator.pushReplacementNamed(context, AfterSplashScreen.routeName);
   }
 
   @override

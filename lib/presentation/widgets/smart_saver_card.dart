@@ -29,7 +29,8 @@ class SmartSaverCard extends StatelessWidget {
                   children: [
                     Text(
                       'Smartsaver-$userId',
-                      style: TextStyles.heading4,
+                      style: TextStyles.body4
+                          .copyWith(fontWeight: FontWeight.w500),
                     ),
                     const Text(
                       'USER ID',
