@@ -38,7 +38,7 @@ class MyApp extends StatelessWidget {
         title: 'Rakt Pravah',
         theme: Themes.defaultTheme,
         onGenerateRoute: Routes.onGenerateRoutes,
-        initialRoute: HomePage.routeName,
+        initialRoute: SplashScreen.routeName,
       ),
     );
   }

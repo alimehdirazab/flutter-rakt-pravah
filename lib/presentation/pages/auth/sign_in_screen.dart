@@ -5,7 +5,7 @@ import 'package:rakt_pravah/core/ui.dart';
 import 'package:rakt_pravah/data/repositories/main_repository.dart';
 import 'package:rakt_pravah/logic/cubit/main_states.dart';
 import 'package:rakt_pravah/logic/cubit/main_cubit.dart';
-import 'package:rakt_pravah/logic/services/app_config.dart';
+import 'package:rakt_pravah/logic/services/shared_preferences.dart';
 import 'package:rakt_pravah/presentation/pages/auth/otp_screen.dart';
 import 'package:rakt_pravah/presentation/widgets/custom_dialog_box.dart';
 import 'package:rakt_pravah/presentation/widgets/gap_widget.dart';
@@ -137,7 +137,8 @@ class _SignInScreenState extends State<SignInScreen> {
                                 final mobile = mobileController.text;
                                 if (mobile.isNotEmpty && mobile.length == 10) {
                                   // Validate mobile number
-                                  AppConfig.phoneNumber = mobile;
+                                  SharedPreferencesHelper.savePhoneNumber(
+                                      mobile);
                                   context.read<MainCubit>().requestOtp(mobile);
                                 } else {
                                   // Show validation error

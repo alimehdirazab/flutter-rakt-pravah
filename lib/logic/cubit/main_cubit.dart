@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rakt_pravah/data/models/blood_request_list_response.dart';
@@ -133,6 +135,18 @@ class MainCubit extends Cubit<MainState> {
     } catch (e) {
       emit(AcceptedBloodRequestListError(
           'Failed to fetch Accepted BloodRequestList details: $e'));
+    }
+  }
+
+  Future<void> uploadImage(File profileImage) async {
+    emit(ProfileImageLoading());
+    try {
+      final message =
+          await mainRepository.uploadProfileImage(profileImage: profileImage);
+      emit(ProfileImageSuccess(
+          message ?? 'Profile image updated successfully.'));
+    } catch (e) {
+      emit(ProfileImageError('Failed to upload image: $e'));
     }
   }
 }

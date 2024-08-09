@@ -135,3 +135,24 @@ class AcceptedBloodRequestListError extends MainState {
 
   AcceptedBloodRequestListError(this.errorMessage);
 }
+
+//////////////////////////////////////////////////////
+class ProfileImageLoading extends MainState {}
+
+class ProfileImageSuccess extends MainState {
+  final String message;
+
+  ProfileImageSuccess(this.message);
+
+  @override
+  List<Object?> get props => [message];
+}
+
+class ProfileImageError extends MainState {
+  final String errorMessage;
+
+  ProfileImageError(this.errorMessage);
+
+  @override
+  List<Object?> get props => [errorMessage];
+}

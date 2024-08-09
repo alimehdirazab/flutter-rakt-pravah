@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:rakt_pravah/core/api.dart';
 import 'package:rakt_pravah/data/models/about_us_response.dart';
@@ -8,7 +10,7 @@ import 'package:rakt_pravah/data/models/register_response.dart';
 import 'package:rakt_pravah/data/models/verify_otp_response.dart';
 import 'package:rakt_pravah/data/models/terms_conditions_response.dart';
 import 'package:rakt_pravah/data/models/banner_response.dart';
-import 'package:rakt_pravah/logic/services/app_config.dart';
+import 'package:rakt_pravah/logic/services/shared_preferences.dart';
 
 class MainRepository {
   final Api api;
@@ -57,11 +59,9 @@ class MainRepository {
           // Use the token as needed (e.g., store it for future requests)
           final token = otpResponse.token;
           final id = otpResponse.data?.id;
-          AppConfig.userToken = token;
-          AppConfig.id = id;
-          print('Token: $token');
-          print('Id: $id');
 
+          SharedPreferencesHelper.saveToken(token!);
+          SharedPreferencesHelper.saveId(id!);
           return otpResponse;
         } else {
           // Process unexpected message
@@ -86,17 +86,13 @@ class MainRepository {
         }
       } else if (response.statusCode == 401) {
         // Handle unauthorized and invalid OTP
-        if (response.data['message'] == 'Invalid OTP') {
-          throw Exception(response.data['message']);
-        } else {
-          throw Exception('Unauthorized access - please try again.');
-        }
+        throw Exception(response.data['message']);
       } else {
         throw Exception('Failed to verify OTP');
       }
     } catch (e) {
       print('Error details: $e');
-      throw Exception('Error: $e');
+      throw 'Invalid OTP or Expire';
     }
   }
 
@@ -152,17 +148,19 @@ class MainRepository {
     required String location,
   }) async {
     try {
+      int? id = await SharedPreferencesHelper.getId();
       final response = await api.sendRequest.post(
         'register',
         data: FormData.fromMap({
+          'id': id,
           'firstname': firstName,
           'lastname': lastName,
           'mobile': mobile,
           'email': email,
           'bloodgroup': bloodGroup,
           'dob': dob,
-          'tattoo': tattoo ? 'yes' : 'no',
-          'is_hiv_positive': isHivPositive ? 'yes' : 'no',
+          'tattoo': tattoo ? 1 : 0,
+          'is_hiv_positive': isHivPositive ? 1 : 0,
           'location': location,
           "registration_status": 1,
         }),
@@ -173,9 +171,10 @@ class MainRepository {
           },
         ),
       );
+      final registorResult = RegisterResponse.fromJson(response.data);
 
       if (response.statusCode == 201) {
-        return RegisterResponse.fromJson(response.data);
+        return registorResult;
       } else {
         throw Exception('Failed to register user');
       }
@@ -200,8 +199,8 @@ class MainRepository {
 
   Future<ProfileResponse> fetchProfileDetails() async {
     try {
-      int id = AppConfig.id!;
-      String token = AppConfig.userToken!;
+      int? id = await SharedPreferencesHelper.getId();
+      String? token = await SharedPreferencesHelper.getToken();
       final response = await api.sendRequest.get(
         'profile',
         queryParameters: {'user_id': id},
@@ -224,11 +223,11 @@ class MainRepository {
 
   Future<BloodRequestListResponse> fetchBloodRequestList() async {
     try {
-      int id = AppConfig.id!;
-      String token = AppConfig.userToken!;
+      int? id = await SharedPreferencesHelper.getId();
+      String? token = await SharedPreferencesHelper.getToken();
       final response = await api.sendRequest.get(
         'blood-request-list',
-        queryParameters: {'user_id': id},
+        queryParameters: {'d': id},
         options: Options(
           headers: {
             'Authorization': 'Bearer $token',
@@ -248,11 +247,11 @@ class MainRepository {
 
   Future<BloodRequestListResponse> fetchAcceptedBloodRequestList() async {
     try {
-      int id = AppConfig.id!;
-      String token = AppConfig.userToken!;
+      int? id = await SharedPreferencesHelper.getId();
+      String? token = await SharedPreferencesHelper.getToken();
       final response = await api.sendRequest.get(
         'accepted-blood-request-list',
-        queryParameters: {'user_id': id},
+        queryParameters: {'id': id},
         options: Options(
           headers: {
             'Authorization': 'Bearer $token',
@@ -285,10 +284,12 @@ class MainRepository {
     required bool isCritical,
   }) async {
     try {
+      int? id = await SharedPreferencesHelper.getId();
+      String? token = await SharedPreferencesHelper.getToken();
       final response = await api.sendRequest.post(
         'blood-request',
         data: FormData.fromMap({
-          'user_id': AppConfig.id,
+          'user_id': id,
           'patient_f_name': patientFirstName,
           'patient_l_name': patientLastName,
           'attendee_f_name': attendeeFirstName,
@@ -305,7 +306,7 @@ class MainRepository {
         options: Options(
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
-            'Authorization': 'Bearer ${AppConfig.userToken!}',
+            'Authorization': 'Bearer $token',
           },
         ),
       );
@@ -314,6 +315,90 @@ class MainRepository {
         return response.statusMessage;
       } else {
         throw Exception('Failed to create blood request');
+      }
+    } catch (e) {
+      throw Exception('Error: $e');
+    }
+  }
+
+  Future<String?> editProfile({
+    required String name,
+    required String mobile,
+    required String email,
+    required String bloodGroup,
+    required String dob,
+    required int? tattoo,
+    required int? isHivPositive,
+    required String location,
+    required String lastDate,
+  }) async {
+    try {
+      int? id = await SharedPreferencesHelper.getId();
+      String? token = await SharedPreferencesHelper.getToken();
+      final response = await api.sendRequest.post(
+        'edit-profile',
+        data: FormData.fromMap({
+          'user_id': id,
+          'name': name,
+          'mobile': mobile,
+          'email': email,
+          'blood_group': bloodGroup,
+          'dob': dob,
+          'tattoo': tattoo,
+          'is_hiv_positive': isHivPositive,
+          'location': location,
+          'last_date': lastDate
+        }),
+        options: Options(
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Authorization': 'Bearer $token',
+            // Add other headers if necessary
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        return response.statusMessage;
+      } else {
+        throw Exception('Failed to Update user');
+      }
+    } catch (e) {
+      throw Exception('Error: $e');
+    }
+  }
+
+  Future<String?> uploadProfileImage({
+    required File profileImage,
+  }) async {
+    try {
+      String? token = await SharedPreferencesHelper.getToken();
+      int? id = await SharedPreferencesHelper.getId();
+      final formData = FormData.fromMap({
+        'user_id': id,
+        'profile_image': await MultipartFile.fromFile(profileImage.path),
+      });
+
+      final response = await api.sendRequest.post(
+        'user-profile-upload',
+        data: formData,
+        options: Options(
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            'Authorization': 'Bearer $token',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        if (data['status'] == true) {
+          return data['message'];
+        } else {
+          throw Exception('Failed to upload profile image');
+        }
+      } else {
+        throw Exception('Failed to upload profile image');
       }
     } catch (e) {
       throw Exception('Error: $e');

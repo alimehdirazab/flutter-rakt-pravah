@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:rakt_pravah/logic/services/shared_preferences.dart';
 import 'package:rakt_pravah/presentation/pages/auth/sign_in_screen.dart';
+import 'package:rakt_pravah/presentation/pages/home/home_page.dart';
 
 class AfterSplashScreen extends StatefulWidget {
   const AfterSplashScreen({super.key});
@@ -19,14 +21,22 @@ class _AfterSplashScreenState extends State<AfterSplashScreen> {
   }
 
   Future<void> _navigateOnNextScreen() async {
-    await Future.delayed(const Duration(seconds: 20));
+    await Future.delayed(const Duration(seconds: 10));
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
       ),
     );
-    Navigator.pushReplacementNamed(context, SignInScreen.routeName);
+    String? token = await SharedPreferencesHelper.getToken();
+    int? id = await SharedPreferencesHelper.getId();
+    String? name = await SharedPreferencesHelper.getName();
+
+    if (token != null && id != null && name != null) {
+      Navigator.pushReplacementNamed(context, HomePage.routeName);
+    } else {
+      Navigator.pushReplacementNamed(context, SignInScreen.routeName);
+    }
   }
 
   @override

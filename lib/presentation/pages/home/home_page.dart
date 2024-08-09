@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:rakt_pravah/core/ui.dart';
+import 'package:rakt_pravah/logic/services/shared_preferences.dart';
 import 'package:rakt_pravah/presentation/pages/auth/sign_in_screen.dart';
 import 'package:rakt_pravah/presentation/pages/home/request_for_blood_screen.dart';
 import 'package:rakt_pravah/presentation/pages/home/dashboard_screen.dart';
@@ -12,6 +13,7 @@ import 'package:rakt_pravah/presentation/pages/other/request_screen.dart';
 import 'package:rakt_pravah/presentation/pages/other/terms_conditions.dart';
 import 'package:rakt_pravah/presentation/widgets/drawer_tile.dart';
 import 'package:rakt_pravah/presentation/widgets/gap_widget.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -149,6 +151,7 @@ class _HomePageState extends State<HomePage> {
                   icon: Icons.logout,
                   title: 'Logout',
                   onTap: () {
+                    SharedPreferencesHelper.clearAll();
                     Navigator.popUntil(context, (route) => route.isFirst);
                     Navigator.pushReplacementNamed(
                         context, SignInScreen.routeName);
