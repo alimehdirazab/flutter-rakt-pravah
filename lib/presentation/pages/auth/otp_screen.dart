@@ -10,6 +10,7 @@ import 'package:rakt_pravah/presentation/widgets/custom_dialog_box.dart';
 import 'package:rakt_pravah/presentation/widgets/gap_widget.dart';
 import 'package:rakt_pravah/presentation/widgets/otp_box.dart';
 import 'package:rakt_pravah/presentation/widgets/primary_button.dart';
+import 'package:sms_autofill/sms_autofill.dart';
 
 class OtpScreen extends StatefulWidget {
   final String phoneNumber;
@@ -21,25 +22,51 @@ class OtpScreen extends StatefulWidget {
   State<OtpScreen> createState() => _OtpScreenState();
 }
 
-class _OtpScreenState extends State<OtpScreen> {
+class _OtpScreenState extends State<OtpScreen> with CodeAutoFill {
   late List<TextEditingController> _controllers;
   bool _isResendEnabled = false;
   bool _showResendButton = false;
-  int _resendTimerSeconds = 30;
+  int _resendTimerSeconds = 45;
   late Timer _resendTimer;
+
+  String? appSignature;
 
   @override
   void initState() {
     super.initState();
     _controllers = List.generate(6, (index) => TextEditingController());
     startResendTimer();
+    _listenForSmsCode();
+    _getAppSignature();
   }
 
   @override
   void dispose() {
     _controllers.forEach((controller) => controller.dispose());
     _resendTimer.cancel();
+    cancel();
     super.dispose();
+  }
+
+  // Method to fetch app signature
+  void _getAppSignature() async {
+    appSignature = await SmsAutoFill().getAppSignature;
+    print("App Signature: $appSignature");
+  }
+
+  // Method to start listening for SMS code
+  void _listenForSmsCode() {
+    listenForCode();
+  }
+
+  @override
+  void codeUpdated() {
+    // Retrieve the code from the autofill service and update the text fields
+    SmsAutoFill().code.listen((code) {
+      for (int i = 0; i < code.length; i++) {
+        _controllers[i].text = code[i];
+      }
+    });
   }
 
   void startResendTimer() {
@@ -65,7 +92,7 @@ class _OtpScreenState extends State<OtpScreen> {
 
     // Restart the timer
     setState(() {
-      _resendTimerSeconds = 30;
+      _resendTimerSeconds = 45;
       _showResendButton = false;
       startResendTimer();
     });
@@ -131,21 +158,20 @@ class _OtpScreenState extends State<OtpScreen> {
                 const GapWidget(),
                 Form(
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: List.generate(
-                      6,
-                      (index) => Expanded(
-                        child: OtpBox(
-                          controller: _controllers[index],
-                          onChanged: (value) {
-                            if (value.isNotEmpty && index < 5) {
-                              FocusScope.of(context).nextFocus();
-                            }
-                          },
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: List.generate(
+                        6,
+                        (index) => Expanded(
+                          child: OtpBox(
+                            controller: _controllers[index],
+                            onChanged: (value) {
+                              if (value.isNotEmpty && index < 5) {
+                                FocusScope.of(context).nextFocus();
+                              }
+                            },
+                          ),
                         ),
-                      ),
-                    ),
-                  ),
+                      )),
                 ),
                 const GapWidget(),
                 BlocConsumer<MainCubit, MainState>(
@@ -166,7 +192,7 @@ class _OtpScreenState extends State<OtpScreen> {
                         _showCustomDialog(
                           context,
                           'Account Created',
-                          'Your Account is Successfully Crreated\n Plz Register Your Details !',
+                          'Your Account is Successfully Created\nPlease Register Your Details!',
                           () {
                             Navigator.pushNamed(
                                 context, RegistorDetails.routeName,

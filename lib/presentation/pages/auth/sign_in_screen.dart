@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rakt_pravah/core/api.dart';
 import 'package:rakt_pravah/core/ui.dart';
@@ -111,7 +112,13 @@ class _SignInScreenState extends State<SignInScreen> {
                             const GapWidget(size: 30),
                             TextFormField(
                               controller: mobileController,
-                              keyboardType: TextInputType.phone,
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [
+                                LengthLimitingTextInputFormatter(
+                                    10), // Limits input to 10 digits
+                                FilteringTextInputFormatter
+                                    .digitsOnly, // Allows only digits
+                              ],
                               decoration: const InputDecoration(
                                 hintText: ' Mobile Number*',
                                 prefix: Text(
@@ -128,6 +135,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                 ),
                               ),
                             ),
+
                             const GapWidget(size: 20),
                             if (state
                                 is OtpLoadingState) // Show loading indicator when loading

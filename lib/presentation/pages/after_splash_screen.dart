@@ -21,7 +21,7 @@ class _AfterSplashScreenState extends State<AfterSplashScreen> {
   }
 
   Future<void> _navigateOnNextScreen() async {
-    await Future.delayed(const Duration(seconds: 10));
+    await Future.delayed(const Duration(seconds: 6));
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
