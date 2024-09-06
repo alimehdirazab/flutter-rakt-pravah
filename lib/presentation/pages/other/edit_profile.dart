@@ -342,12 +342,12 @@ class _EditProfileState extends State<EditProfile> {
                     controller: _lastDonationController,
                     hintText: 'Last Blood Donation Date',
                     enabled: false,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please select your date of birth';
-                      }
-                      return null;
-                    },
+                    // validator: (value) {
+                    //   if (value == null || value.isEmpty) {
+                    //     return 'Please select your date of birth';
+                    //   }
+                    //   return null;
+                    // },
                   ),
                 ),
                 SizedBox(height: 10),

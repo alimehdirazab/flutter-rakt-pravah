@@ -1,16 +1,17 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:rakt_pravah/core/ui.dart';
-import 'package:rakt_pravah/logic/cubit/main_states.dart';
+import 'package:sms_autofill/sms_autofill.dart';
 import 'package:rakt_pravah/logic/cubit/main_cubit.dart';
+import 'package:rakt_pravah/logic/cubit/main_states.dart';
 import 'package:rakt_pravah/presentation/pages/auth/registor_details.dart';
 import 'package:rakt_pravah/presentation/pages/home/home_page.dart';
 import 'package:rakt_pravah/presentation/widgets/custom_dialog_box.dart';
 import 'package:rakt_pravah/presentation/widgets/gap_widget.dart';
 import 'package:rakt_pravah/presentation/widgets/otp_box.dart';
 import 'package:rakt_pravah/presentation/widgets/primary_button.dart';
-import 'package:sms_autofill/sms_autofill.dart';
+import 'package:rakt_pravah/core/ui.dart';
 
 class OtpScreen extends StatefulWidget {
   final String phoneNumber;
@@ -24,6 +25,7 @@ class OtpScreen extends StatefulWidget {
 
 class _OtpScreenState extends State<OtpScreen> with CodeAutoFill {
   late List<TextEditingController> _controllers;
+  late List<FocusNode> _focusNodes; // List of FocusNodes
   bool _isResendEnabled = false;
   bool _showResendButton = false;
   int _resendTimerSeconds = 45;
@@ -35,6 +37,8 @@ class _OtpScreenState extends State<OtpScreen> with CodeAutoFill {
   void initState() {
     super.initState();
     _controllers = List.generate(6, (index) => TextEditingController());
+    _focusNodes =
+        List.generate(6, (index) => FocusNode()); // Initialize FocusNodes
     startResendTimer();
     _listenForSmsCode();
     _getAppSignature();
@@ -43,6 +47,8 @@ class _OtpScreenState extends State<OtpScreen> with CodeAutoFill {
   @override
   void dispose() {
     _controllers.forEach((controller) => controller.dispose());
+    _focusNodes
+        .forEach((focusNode) => focusNode.dispose()); // Dispose FocusNodes
     _resendTimer.cancel();
     cancel();
     super.dispose();
@@ -158,20 +164,30 @@ class _OtpScreenState extends State<OtpScreen> with CodeAutoFill {
                 const GapWidget(),
                 Form(
                   child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: List.generate(
-                        6,
-                        (index) => Expanded(
-                          child: OtpBox(
-                            controller: _controllers[index],
-                            onChanged: (value) {
-                              if (value.isNotEmpty && index < 5) {
-                                FocusScope.of(context).nextFocus();
-                              }
-                            },
-                          ),
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: List.generate(
+                      6,
+                      (index) => Expanded(
+                        child: OtpBox(
+                          controller: _controllers[index],
+                          focusNode: _focusNodes[
+                              index], // Assign the corresponding FocusNode
+                          textInputAction: index < 5
+                              ? TextInputAction.next
+                              : TextInputAction.done, // Set text input action
+                          onChanged: (value) {
+                            if (value.isNotEmpty && index < 5) {
+                              FocusScope.of(context)
+                                  .requestFocus(_focusNodes[index + 1]);
+                            } else if (value.isEmpty && index > 0) {
+                              FocusScope.of(context)
+                                  .requestFocus(_focusNodes[index - 1]);
+                            }
+                          },
                         ),
-                      )),
+                      ),
+                    ),
+                  ),
                 ),
                 const GapWidget(),
                 BlocConsumer<MainCubit, MainState>(

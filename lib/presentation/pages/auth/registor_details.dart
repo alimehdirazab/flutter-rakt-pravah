@@ -304,12 +304,12 @@ class _RegistorDetailsState extends State<RegistorDetails> {
                         hintText: 'Please Select Location',
                         icon: Icons.pin_drop,
                         controller: _locationController,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please select your location';
-                          }
-                          return null;
-                        },
+                        // validator: (value) {
+                        //   if (value == null || value.isEmpty) {
+                        //     return 'Please select your location';
+                        //   }
+                        //   return null;
+                        // },
                       ),
                       const GapWidget(),
                       Row(

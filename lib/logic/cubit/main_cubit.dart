@@ -91,7 +91,7 @@ class MainCubit extends Cubit<MainState> {
     required String dob,
     required bool tattoo,
     required bool isHivPositive,
-    required String location,
+    required String? location,
   }) async {
     emit(RegisterLoadingState());
 
@@ -105,7 +105,7 @@ class MainCubit extends Cubit<MainState> {
         dob: dob,
         tattoo: tattoo,
         isHivPositive: isHivPositive,
-        location: location,
+        location: location ?? '',
       );
 
       emit(RegisterSuccessState(response));

@@ -124,17 +124,19 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                                 padding:
                                     const EdgeInsets.only(right: 0, bottom: 20),
                                 child: ClipOval(
-                                  child: profile!.image != null
-                                      ? Image.network(
-                                          profile.image ?? "N/A",
-                                          width: 90,
-                                          height: 90,
-                                          fit: BoxFit.cover,
-                                        )
-                                      : const Icon(
-                                          Icons.person,
-                                          size: 120,
-                                        ),
+                                  child: //profile!.image != null ||
+                                      profile!.image !=
+                                              "https://raktpravah.com/uploads/images/profile/"
+                                          ? Image.network(
+                                              profile.image ?? "N/A",
+                                              width: 90,
+                                              height: 90,
+                                              fit: BoxFit.cover,
+                                            )
+                                          : const Icon(
+                                              Icons.person,
+                                              size: 90,
+                                            ),
                                 ),
                               ),
                               CircleAvatar(

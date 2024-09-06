@@ -35,7 +35,6 @@ class VerifyOtpResponse {
   }
 }
 
-// UserData class to represent the user data part of the response
 class UserData {
   final int? id;
   final String? uniqueId;
@@ -51,8 +50,8 @@ class UserData {
   final String? location;
   final double? latitude;
   final double? longitude;
-  final String? tattoo;
-  final bool? isHivPositive;
+  final int? tattoo; // Updated to int
+  final bool? isHivPositive; // Can keep as bool with proper parsing
   final int? registrationStatus;
   final DateTime? createdAt;
   final DateTime? updatedAt;
@@ -73,7 +72,7 @@ class UserData {
     this.location,
     this.latitude,
     this.longitude,
-    this.tattoo,
+    this.tattoo, // Updated to int
     this.isHivPositive,
     this.registrationStatus,
     this.createdAt,
@@ -98,7 +97,7 @@ class UserData {
       location: json['location'] as String?,
       latitude: _parseDouble(json['latitude']),
       longitude: _parseDouble(json['longitude']),
-      tattoo: json['tattoo'] as String?,
+      tattoo: json['tattoo'] as int?, // Updated to int
       isHivPositive: _parseBool(json['is_hiv_positive']),
       registrationStatus: json['registration_status'] as int?,
       createdAt: _parseDateTime(json['created_at']),
@@ -124,7 +123,7 @@ class UserData {
       'location': location,
       'latitude': latitude,
       'longitude': longitude,
-      'tattoo': tattoo,
+      'tattoo': tattoo, // Updated to int
       'is_hiv_positive': isHivPositive,
       'registration_status': registrationStatus,
       'created_at': createdAt?.toIso8601String(),

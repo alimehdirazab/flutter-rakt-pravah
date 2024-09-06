@@ -43,7 +43,6 @@ class MainRepository {
         options: Options(
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
-            // Add any other required headers here
           },
         ),
       );
@@ -52,7 +51,9 @@ class MainRepository {
       if (response.statusCode == 200) {
         // Successful OTP verification
         final responseData = response.data;
-        if (responseData['message']?.toLowerCase() == 'loggedin successfull') {
+
+        // Handle different success messages for new and existing users
+        if (responseData['message']?.toLowerCase().contains('loggedin')) {
           // Parse response data into VerifyOtpResponse model
           final otpResponse = VerifyOtpResponse.fromJson(responseData);
 
@@ -72,14 +73,12 @@ class MainRepository {
         // Validation errors
         final errorMessage = response.data['message'];
         if (errorMessage is Map<String, dynamic>) {
-          // Handle specific error messages for fields
           final mobileError = errorMessage['mobile']?.join(', ') ?? '';
           final otpError = errorMessage['otp']?.join(', ') ?? '';
           final combinedErrorMessage =
               [mobileError, otpError].where((s) => s.isNotEmpty).join(' ');
           throw Exception(combinedErrorMessage);
         } else if (errorMessage is String) {
-          // Handle general error message
           throw Exception(errorMessage);
         } else {
           throw Exception('Unexpected response format');
@@ -92,7 +91,7 @@ class MainRepository {
       }
     } catch (e) {
       print('Error details: $e');
-      throw 'Invalid OTP or Expire';
+      throw 'Invalid OTP or Expired';
     }
   }
 
@@ -145,7 +144,7 @@ class MainRepository {
     required String dob,
     required bool tattoo,
     required bool isHivPositive,
-    required String location,
+    required String? location,
   }) async {
     try {
       int? id = await SharedPreferencesHelper.getId();
@@ -161,7 +160,7 @@ class MainRepository {
           'dob': dob,
           'tattoo': tattoo ? 1 : 0,
           'is_hiv_positive': isHivPositive ? 1 : 0,
-          'location': location,
+          'location': location ?? '',
           "registration_status": 1,
         }),
         options: Options(
@@ -330,7 +329,7 @@ class MainRepository {
     required int? tattoo,
     required int? isHivPositive,
     required String location,
-    required String lastDate,
+    required String? lastDate,
   }) async {
     try {
       int? id = await SharedPreferencesHelper.getId();
@@ -347,7 +346,7 @@ class MainRepository {
           'tattoo': tattoo,
           'is_hiv_positive': isHivPositive,
           'location': location,
-          'last_date': lastDate
+          'last_date': lastDate ?? ''
         }),
         options: Options(
           headers: {
