@@ -8,6 +8,7 @@ class RequestsCard extends StatelessWidget {
   final String units;
   final String address;
   final String date;
+  final void Function()? onAcceptPressed;
 
   const RequestsCard({
     super.key,
@@ -16,6 +17,7 @@ class RequestsCard extends StatelessWidget {
     required this.units,
     required this.address,
     required this.date,
+    required this.onAcceptPressed,
   });
 
   @override
@@ -151,7 +153,7 @@ class RequestsCard extends StatelessWidget {
                           size:
                               8), // Corrected GapWidget size for proper spacing
                       ElevatedButton(
-                        onPressed: () {},
+                        onPressed: onAcceptPressed,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green,
                           minimumSize: const Size(80, 36), // Adjust button size

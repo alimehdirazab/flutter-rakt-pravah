@@ -152,17 +152,22 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                         ],
                       ),
                       Text(
-                        profile?.name ?? "N/A",
+                        profile.name ?? "N/A",
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      const GapWidget(),
+                      const GapWidget(size: -10),
                       Text(
-                        profile?.mobile ?? "N/A",
+                        profile.email ?? "N/A",
                         style: const TextStyle(color: Colors.grey),
                       ),
                       const GapWidget(size: -10),
                       Text(
-                        profile?.location ?? "N/A",
+                        profile.mobile ?? "N/A",
+                        style: const TextStyle(color: Colors.grey),
+                      ),
+                      const GapWidget(size: -10),
+                      Text(
+                        profile.location ?? "N/A",
                         style: const TextStyle(color: Colors.grey),
                       ),
                       const GapWidget(size: -10),
@@ -175,7 +180,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 20, vertical: 10),
                           child: Text(
-                            profile?.bloodGroup ?? "N/A",
+                            profile.bloodGroup ?? "N/A",
                             style: const TextStyle(color: Colors.white),
                           ),
                         ),
@@ -211,7 +216,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                               children: [
                                 const Text('Are you Available'),
                                 Switch(
-                                  value: profile?.isHivPositive == 1,
+                                  value: profile.isHivPositive == 1,
                                   onChanged: (value) {
                                     // Handle switch state change
                                   },
@@ -238,7 +243,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                                       child: Row(
                                         children: [
                                           Text(
-                                            profile.lastDate ?? "N/A",
+                                            profile.lastDate ?? '',
                                           ),
                                           const VerticalDivider(),
                                           const Icon(Icons.date_range)

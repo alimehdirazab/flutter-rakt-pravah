@@ -2,10 +2,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:rakt_pravah/core/api.dart';
 import 'package:rakt_pravah/core/ui.dart';
 import 'package:rakt_pravah/data/models/banner_response.dart';
 import 'package:rakt_pravah/data/models/blood_request_list_response.dart';
 import 'package:rakt_pravah/data/models/profile_response.dart';
+import 'package:rakt_pravah/data/repositories/main_repository.dart';
 import 'package:rakt_pravah/logic/cubit/banner%20cubit/banner_cubit.dart';
 import 'package:rakt_pravah/logic/cubit/banner%20cubit/banner_state.dart';
 import 'package:rakt_pravah/logic/cubit/main_cubit.dart';
@@ -13,8 +15,10 @@ import 'package:rakt_pravah/logic/cubit/main_states.dart';
 import 'package:rakt_pravah/logic/cubit/profile%20cubit/profile_cubit.dart';
 import 'package:rakt_pravah/logic/cubit/profile%20cubit/profile_states.dart';
 import 'package:rakt_pravah/logic/services/shared_preferences.dart';
+import 'package:rakt_pravah/presentation/pages/home/home_page.dart';
 import 'package:rakt_pravah/presentation/pages/home/request_for_blood_screen.dart';
 import 'package:rakt_pravah/presentation/pages/other/request_screen.dart';
+import 'package:rakt_pravah/presentation/widgets/custom_dialog_box.dart';
 import 'package:rakt_pravah/presentation/widgets/dashboard_card.dart';
 import 'package:rakt_pravah/presentation/widgets/gap_widget.dart';
 import 'package:rakt_pravah/presentation/widgets/requests_card.dart';
@@ -31,6 +35,8 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
+  final MainRepository _mainRepository =
+      MainRepository(Api()); // Create an instance of the repository
   late MainCubit _mainCubit;
   late BannerCubit _bannerCubit;
   late ProfileCubit _profileCubit;
@@ -56,6 +62,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
     _profileCubit.getProfileDetails();
     _bannerCubit.fetchBanner();
     _mainCubit.getBloodRequestList();
+  }
+
+  void _showCustomDialog(BuildContext context, String title, String description,
+      void Function() onOkPressed) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return CustomDialogBox(
+          title: title,
+          description: description,
+          onOkPressed: onOkPressed,
+        );
+      },
+    );
   }
 
   @override
@@ -348,6 +368,29 @@ class _DashboardScreenState extends State<DashboardScreen> {
             units: '${request.numberOfUnits} Units (${request.requestType})',
             address: request.locationForDonation ?? "N/A",
             date: request.requiredDate ?? "N/A",
+            onAcceptPressed: () async {
+              // Handle accept button press
+
+              try {
+                String? message = await _mainRepository.acceptBloodRequest(
+                    requestId: request.id);
+
+                if (message != null) {
+                  _showCustomDialog(
+                      context,
+                      'Blood Request Accepted',
+                      'Blood Request Accepted Successfully',
+                      () => Navigator.pushNamed(
+                          context, DashboardScreen.routeName));
+                }
+              } catch (e) {
+                _showCustomDialog(
+                    context,
+                    'Failed Accepting Blood Request',
+                    ' Failed: To Accept Blood Request',
+                    () => Navigator.pushNamed(context, HomePage.routeName));
+              }
+            },
           );
         }).toList(),
       ),

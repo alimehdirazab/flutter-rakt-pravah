@@ -249,13 +249,15 @@ class _OtpScreenState extends State<OtpScreen> with CodeAutoFill {
                   },
                 ),
                 const GapWidget(),
-                Text(
-                  '00:$_resendTimerSeconds',
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.primary,
-                    fontSize: 20,
-                  ),
-                ),
+                _resendTimerSeconds != 0
+                    ? Text(
+                        '00:$_resendTimerSeconds',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontSize: 20,
+                        ),
+                      )
+                    : const SizedBox(),
                 if (_showResendButton)
                   TextButton(
                     onPressed: _handleResend,

@@ -226,7 +226,7 @@ class MainRepository {
       String? token = await SharedPreferencesHelper.getToken();
       final response = await api.sendRequest.get(
         'blood-request-list',
-        queryParameters: {'d': id},
+        queryParameters: {'id': id},
         options: Options(
           headers: {
             'Authorization': 'Bearer $token',
@@ -250,7 +250,7 @@ class MainRepository {
       String? token = await SharedPreferencesHelper.getToken();
       final response = await api.sendRequest.get(
         'accepted-blood-request-list',
-        queryParameters: {'id': id},
+        queryParameters: {'user_id': id},
         options: Options(
           headers: {
             'Authorization': 'Bearer $token',
@@ -398,6 +398,43 @@ class MainRepository {
         }
       } else {
         throw Exception('Failed to upload profile image');
+      }
+    } catch (e) {
+      throw Exception('Error: $e');
+    }
+  }
+
+  Future<String?> acceptBloodRequest({
+    required requestId,
+  }) async {
+    try {
+      String? token = await SharedPreferencesHelper.getToken();
+      int? id = await SharedPreferencesHelper.getId();
+      final formData = FormData.fromMap({
+        'user_id': id,
+        'request_id': requestId,
+      });
+
+      final response = await api.sendRequest.post(
+        'accept-blood-request',
+        data: formData,
+        options: Options(
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            'Authorization': 'Bearer $token',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        if (data['status'] == true) {
+          return data['message'];
+        } else {
+          throw Exception('Failed to Accept Request');
+        }
+      } else {
+        throw Exception('Failed to Accept Request');
       }
     } catch (e) {
       throw Exception('Error: $e');

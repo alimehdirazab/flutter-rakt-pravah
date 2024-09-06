@@ -117,7 +117,8 @@ class _RequestScreenState extends State<RequestScreen> {
                           itemBuilder: (context, index) {
                             final request =
                                 state.bloodRequestListResponse.data[index];
-                            return BloodRequestTile(request: request);
+                            return BloodRequestTile(
+                                request: request, type: 'open');
                           },
                         );
                       }
@@ -132,7 +133,10 @@ class _RequestScreenState extends State<RequestScreen> {
                           itemBuilder: (context, index) {
                             final request =
                                 state.bloodRequestListResponse.data[index];
-                            return BloodRequestTile(request: request);
+                            return BloodRequestTile(
+                              request: request,
+                              type: 'close',
+                            );
                           },
                         );
                       }
