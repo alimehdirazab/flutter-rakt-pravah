@@ -157,17 +157,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                       ),
                       const GapWidget(size: -10),
                       Text(
-                        profile.email ?? "N/A",
-                        style: const TextStyle(color: Colors.grey),
-                      ),
-                      const GapWidget(size: -10),
-                      Text(
-                        profile.mobile ?? "N/A",
-                        style: const TextStyle(color: Colors.grey),
-                      ),
-                      const GapWidget(size: -10),
-                      Text(
-                        profile.location ?? "N/A",
+                        profile.uniqueId ?? "N/A",
                         style: const TextStyle(color: Colors.grey),
                       ),
                       const GapWidget(size: -10),
@@ -210,6 +200,57 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                         padding: const EdgeInsets.all(16.0),
                         child: Column(
                           children: [
+                            const Divider(),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      'Email',
+                                      style: TextStyle(color: Colors.grey),
+                                    ),
+                                    const GapWidget(size: -10),
+                                    Text(profile.email ?? 'N/A'),
+                                  ],
+                                )
+                              ],
+                            ),
+                            const Divider(),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      'Phone',
+                                      style: TextStyle(color: Colors.grey),
+                                    ),
+                                    const GapWidget(size: -10),
+                                    Text(profile.mobile ?? 'N/A'),
+                                  ],
+                                )
+                              ],
+                            ),
+                            const Divider(),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text(
+                                      'Location',
+                                      style: TextStyle(color: Colors.grey),
+                                    ),
+                                    const GapWidget(size: -10),
+                                    Text(profile.location ?? 'N/A'),
+                                  ],
+                                )
+                              ],
+                            ),
                             const Divider(),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
