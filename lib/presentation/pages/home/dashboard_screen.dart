@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,6 +16,7 @@ import 'package:rakt_pravah/logic/cubit/profile%20cubit/profile_states.dart';
 import 'package:rakt_pravah/logic/services/shared_preferences.dart';
 import 'package:rakt_pravah/presentation/pages/home/home_page.dart';
 import 'package:rakt_pravah/presentation/pages/home/request_for_blood_screen.dart';
+import 'package:rakt_pravah/presentation/pages/other/my_profile_screen.dart';
 import 'package:rakt_pravah/presentation/pages/other/request_screen.dart';
 import 'package:rakt_pravah/presentation/widgets/custom_dialog_box.dart';
 import 'package:rakt_pravah/presentation/widgets/dashboard_card.dart';
@@ -59,9 +59,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
     _profileCubit = BlocProvider.of<ProfileCubit>(context);
 
     // Fetch data on initialization
+    _mainCubit.getBloodRequestList();
     _profileCubit.getProfileDetails();
     _bannerCubit.fetchBanner();
-    _mainCubit.getBloodRequestList();
   }
 
   void _showCustomDialog(BuildContext context, String title, String description,
@@ -84,158 +84,175 @@ class _DashboardScreenState extends State<DashboardScreen> {
       onWillPop: () async {
         return _showExitConfirmationDialog(context);
       },
-      child: Scaffold(
-        backgroundColor: Colors.grey[100],
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          backgroundColor: AppColors.primaryColor,
-          leading: IconButton(
-            onPressed: () {
-              Scaffold.of(context).openDrawer();
-            },
-            icon: const Icon(Icons.list, size: 30),
-          ),
-          titleSpacing: 0,
-          title: Row(
-            children: [
-              const Icon(
-                Icons.account_circle_rounded,
-                color: Colors.white,
-                size: 28,
-              ),
-              BlocBuilder<ProfileCubit, ProfileState>(
-                builder: (context, state) {
-                  if (state is ProfileSuccess) {
-                    _profileResponse = state.profileResponse;
-                    print('Profile data: ${_profileResponse?.data}');
-                    SharedPreferencesHelper.saveName(
-                        _profileResponse?.data?.name ?? "");
-                    return Text(
-                      '   Welcome ${_profileResponse?.data?.name ?? 'User'}',
-                      style: const TextStyle(color: Colors.white, fontSize: 14),
-                    );
-                  } else if (state is ProfileError) {
-                    return Text(
-                      'Error: ${state.errorMessage}',
-                      style: const TextStyle(color: Colors.white, fontSize: 14),
-                    );
-                  }
-                  return const Text(
-                    '   Loading...',
-                    style: TextStyle(color: Colors.white, fontSize: 14),
-                  );
-                },
-              ),
-            ],
-          ),
-          actions: [
-            IconButton(
-              onPressed: () {},
-              icon: const Icon(CupertinoIcons.bell),
+      child: RefreshIndicator(
+        onRefresh: () {
+          _mainCubit.getBloodRequestList();
+          _profileCubit.getProfileDetails();
+          _bannerCubit.fetchBanner();
+
+          return Future.value(true);
+        },
+        child: Scaffold(
+          backgroundColor: Colors.grey[100],
+          appBar: AppBar(
+            automaticallyImplyLeading: false,
+            backgroundColor: AppColors.primaryColor,
+            leading: IconButton(
+              onPressed: () {
+                Scaffold.of(context).openDrawer();
+              },
+              icon: const Icon(Icons.list, size: 30),
             ),
-          ],
-        ),
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              Stack(
-                alignment: Alignment.bottomCenter,
+            titleSpacing: 0,
+            title: GestureDetector(
+              onTap: () {
+                Navigator.pushNamed(context, MyProfileScreen.routeName);
+              },
+              child: Row(
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 60),
-                    child: Container(
-                      width: double.infinity,
-                      height: 80,
-                      color: AppColors.primaryColor,
-                    ),
+                  const Icon(
+                    Icons.account_circle_rounded,
+                    color: Colors.white,
+                    size: 28,
                   ),
                   BlocBuilder<ProfileCubit, ProfileState>(
                     builder: (context, state) {
                       if (state is ProfileSuccess) {
                         _profileResponse = state.profileResponse;
-                        myBloodGroup =
-                            _profileResponse?.data?.bloodGroup ?? 'N/A';
-                        return SmartSaverCard(
-                          userId: _profileResponse?.data?.uniqueId.toString() ??
-                              'N/A',
-                          bloodGroup:
-                              _profileResponse?.data?.bloodGroup ?? 'N/A',
+                        print('Profile data: ${_profileResponse?.data}');
+                        SharedPreferencesHelper.saveName(
+                            _profileResponse?.data?.name ?? "");
+                        return Text(
+                          '   Welcome ${_profileResponse?.data?.name ?? 'User'}',
+                          style: const TextStyle(
+                              color: Colors.white, fontSize: 14),
                         );
                       } else if (state is ProfileError) {
-                        return const SmartSaverCard(
-                          userId: 'Error',
-                          bloodGroup: 'Error',
+                        return Text(
+                          'Error: ${state.errorMessage}',
+                          style: const TextStyle(
+                              color: Colors.white, fontSize: 14),
                         );
                       }
-                      return const SmartSaverCard(
-                        userId: 'Loading...',
-                        bloodGroup: 'Loading...',
+                      return const Text(
+                        '   Loading...',
+                        style: TextStyle(color: Colors.white, fontSize: 14),
                       );
                     },
                   ),
                 ],
               ),
-              BlocBuilder<BannerCubit, BannerState>(
-                builder: (context, state) {
-                  if (state is BannerLoadingState) {
-                    // Show shimmer while loading banner
-                    return _buildShimmerBanner();
-                  } else if (state is BannerSuccessState) {
-                    return _buildBannerUI(state.response.data);
-                  } else if (state is BannerFailureState) {
-                    return Center(child: Text('Error: ${state.error}'));
-                  }
-                  return Container();
-                },
-              ),
-              const GapWidget(),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
+            ),
+            // actions: [
+            //   IconButton(
+            //     onPressed: () {},
+            //     icon: const Icon(CupertinoIcons.bell),
+            //   ),
+            // ],
+          ),
+          body: SingleChildScrollView(
+            child: Column(
+              children: [
+                Stack(
+                  alignment: Alignment.bottomCenter,
                   children: [
-                    DashboardCard(
-                      image: 'assets/icons/icon-1.png',
-                      title: 'Request for Blood',
-                      onTap: () {
-                        // Navigate to request blood page
-                        Navigator.pushNamed(
-                            context, RequestForBloodScreen.routeName);
-                      },
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 60),
+                      child: Container(
+                        width: double.infinity,
+                        height: 80,
+                        color: AppColors.primaryColor,
+                      ),
                     ),
-                    const GapWidget(),
-                    DashboardCard(
-                      image: 'assets/icons/icon-2.png',
-                      title: 'Donate Blood',
-                      onTap: () {
-                        // Navigate to donate blood page
-                        Navigator.pushNamed(context, RequestScreen.routeName);
+                    BlocBuilder<ProfileCubit, ProfileState>(
+                      builder: (context, state) {
+                        if (state is ProfileSuccess) {
+                          _profileResponse = state.profileResponse;
+                          myBloodGroup =
+                              _profileResponse?.data?.bloodGroup ?? 'N/A';
+                          return SmartSaverCard(
+                            userId:
+                                _profileResponse?.data?.uniqueId.toString() ??
+                                    'N/A',
+                            bloodGroup:
+                                _profileResponse?.data?.bloodGroup ?? 'N/A',
+                          );
+                        } else if (state is ProfileError) {
+                          return const SmartSaverCard(
+                            userId: 'Error',
+                            bloodGroup: 'Error',
+                          );
+                        }
+                        return const SmartSaverCard(
+                          userId: 'Loading...',
+                          bloodGroup: 'Loading...',
+                        );
                       },
                     ),
                   ],
                 ),
-              ),
-              const GapWidget(),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: BlocBuilder<MainCubit, MainState>(
+                BlocBuilder<BannerCubit, BannerState>(
                   builder: (context, state) {
-                    if (state is BloodRequestListLoading) {
-                      // Show shimmer while loading blood requests
-                      return _buildShimmerBloodRequestList();
-                    } else if (state is BloodRequestListSuccess) {
-                      _bloodRequestListResponse =
-                          state.bloodRequestListResponse;
-                      return _buildBloodRequestListUI(
-                          _bloodRequestListResponse?.data ?? []);
-                    } else if (state is BloodRequestListError) {
-                      return Center(
-                          child: Text('Error: ${state.errorMessage}'));
+                    if (state is BannerLoadingState) {
+                      // Show shimmer while loading banner
+                      return _buildShimmerBanner();
+                    } else if (state is BannerSuccessState) {
+                      return _buildBannerUI(state.response.data);
+                    } else if (state is BannerFailureState) {
+                      return Center(child: Text('Error: ${state.error}'));
                     }
                     return Container();
                   },
                 ),
-              ),
-            ],
+                const GapWidget(),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    children: [
+                      DashboardCard(
+                        image: 'assets/icons/icon-1.png',
+                        title: 'Request for Blood',
+                        onTap: () {
+                          // Navigate to request blood page
+                          Navigator.pushNamed(
+                              context, RequestForBloodScreen.routeName);
+                        },
+                      ),
+                      const GapWidget(),
+                      DashboardCard(
+                        image: 'assets/icons/icon-2.png',
+                        title: 'Donate Blood',
+                        onTap: () {
+                          // Navigate to donate blood page
+                          Navigator.pushNamed(context, RequestScreen.routeName);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                const GapWidget(),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: BlocBuilder<MainCubit, MainState>(
+                    builder: (context, state) {
+                      if (state is BloodRequestListLoading) {
+                        // Show shimmer while loading blood requests
+                        return _buildShimmerBloodRequestList();
+                      } else if (state is BloodRequestListSuccess) {
+                        _bloodRequestListResponse =
+                            state.bloodRequestListResponse;
+                        return _buildBloodRequestListUI(
+                            _bloodRequestListResponse?.data ?? []);
+                      } else if (state is BloodRequestListError) {
+                        return Center(
+                            child: Text('Error: ${state.errorMessage}'));
+                      }
+                      return Container();
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -358,42 +375,85 @@ class _DashboardScreenState extends State<DashboardScreen> {
       );
     }
 
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: filteredRequests.map((request) {
-          return RequestsCard(
-            bloodGroup: request.bloodGroup ?? "NA",
-            name: '${request.patientFirstName} ${request.patientLastName}',
-            units: '${request.numberOfUnits} Units (${request.requestType})',
-            address: request.locationForDonation ?? "N/A",
-            date: request.requiredDate ?? "N/A",
-            onAcceptPressed: () async {
-              // Handle accept button press
+    // If there is only one request, show it without the carousel slider
+    if (filteredRequests.length == 1) {
+      return RequestsCard(
+        bloodGroup: filteredRequests[0].bloodGroup ?? "NA",
+        name:
+            '${filteredRequests[0].patientFirstName} ${filteredRequests[0].patientLastName}',
+        units:
+            '${filteredRequests[0].numberOfUnits} Units (${filteredRequests[0].requestType})',
+        address: filteredRequests[0].locationForDonation ?? "N/A",
+        date: filteredRequests[0].requiredDate ?? "N/A",
+        onAcceptPressed: () async {
+          // Handle accept button press
+          try {
+            String? message = await _mainRepository.acceptBloodRequest(
+                requestId: filteredRequests[0].id);
 
-              try {
-                String? message = await _mainRepository.acceptBloodRequest(
-                    requestId: request.id);
+            if (message != null) {
+              _showCustomDialog(
+                  context,
+                  'Blood Request Accepted',
+                  'Blood Request Accepted Successfully',
+                  () =>
+                      Navigator.pushNamed(context, DashboardScreen.routeName));
+            }
+          } catch (e) {
+            _showCustomDialog(
+                context,
+                'Failed Accepting Blood Request',
+                'Failed: To Accept Blood Request',
+                () => Navigator.pushNamed(context, HomePage.routeName));
+          }
+        },
+      );
+    }
 
-                if (message != null) {
+    // Use CarouselSlider if there is more than one request
+    return CarouselSlider(
+      options: CarouselOptions(
+        height: 220.0, // Set an appropriate height for the cards
+        autoPlay: true,
+        autoPlayInterval: const Duration(seconds: 5), // 5 seconds delay
+        viewportFraction: 1.1,
+        enlargeCenterPage: true,
+      ),
+      items: filteredRequests.map((request) {
+        return Builder(
+          builder: (BuildContext context) {
+            return RequestsCard(
+              bloodGroup: request.bloodGroup ?? "NA",
+              name: '${request.patientFirstName} ${request.patientLastName}',
+              units: '${request.numberOfUnits} Units (${request.requestType})',
+              address: request.locationForDonation ?? "N/A",
+              date: request.requiredDate ?? "N/A",
+              onAcceptPressed: () async {
+                // Handle accept button press
+                try {
+                  String? message = await _mainRepository.acceptBloodRequest(
+                      requestId: request.id);
+
+                  if (message != null) {
+                    _showCustomDialog(
+                        context,
+                        'Blood Request Accepted',
+                        'Blood Request Accepted Successfully',
+                        () => Navigator.pushNamed(
+                            context, DashboardScreen.routeName));
+                  }
+                } catch (e) {
                   _showCustomDialog(
                       context,
-                      'Blood Request Accepted',
-                      'Blood Request Accepted Successfully',
-                      () => Navigator.pushNamed(
-                          context, DashboardScreen.routeName));
+                      'Failed Accepting Blood Request',
+                      'Failed: To Accept Blood Request',
+                      () => Navigator.pushNamed(context, HomePage.routeName));
                 }
-              } catch (e) {
-                _showCustomDialog(
-                    context,
-                    'Failed Accepting Blood Request',
-                    ' Failed: To Accept Blood Request',
-                    () => Navigator.pushNamed(context, HomePage.routeName));
-              }
-            },
-          );
-        }).toList(),
-      ),
+              },
+            );
+          },
+        );
+      }).toList(),
     );
   }
 

@@ -21,6 +21,7 @@ class BloodRequestTile extends StatelessWidget {
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Stack(
                   alignment: Alignment.center,
@@ -81,6 +82,35 @@ class BloodRequestTile extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
+                    if (type == 'open') ...[
+                      Text(
+                        'Phone: ${request.attendeeMobile}',
+                        style: TextStyles.body3.copyWith(
+                          color: Colors.grey,
+                          fontSize: 14.0,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        'Location: ${request.locationForDonation}',
+                        style: TextStyles.body3.copyWith(
+                          color: Colors.grey,
+                          fontSize: 14.0,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        'Hospital: ${request.hospitalName}',
+                        style: TextStyles.body3.copyWith(
+                          color: Colors.grey,
+                          fontSize: 14.0,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
                     Text(
                       'Date: ${request.requiredDate}', // Assuming requestDate is a string. Format it if needed.
                       style: TextStyles.body3.copyWith(

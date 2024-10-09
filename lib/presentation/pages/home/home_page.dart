@@ -40,7 +40,10 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       // Use the GlobalKey here
       key: _scaffoldKey,
-      body: screens[currentIndex],
+      body: IndexedStack(
+        index: currentIndex,
+        children: screens,
+      ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: currentIndex,
         onTap: (index) {
@@ -142,10 +145,6 @@ class _HomePageState extends State<HomePage> {
                   onTap: () {
                     Navigator.pushNamed(context, PrivacyPolicy.routeName);
                   },
-                ),
-                const DrawerTile(
-                  icon: Icons.reviews_outlined,
-                  title: 'Rate Us',
                 ),
                 DrawerTile(
                   icon: Icons.logout,

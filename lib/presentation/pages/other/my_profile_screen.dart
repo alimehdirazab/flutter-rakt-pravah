@@ -21,6 +21,7 @@ class MyProfileScreen extends StatefulWidget {
 }
 
 class _MyProfileScreenState extends State<MyProfileScreen> {
+  bool isSwitched = false;
   final ImagePicker _picker = ImagePicker();
   final MainRepository _mainRepository =
       MainRepository(Api()); // Create an instance of the repository
@@ -257,9 +258,11 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                               children: [
                                 const Text('Are you Available'),
                                 Switch(
-                                  value: profile.isHivPositive == 1,
+                                  value: isSwitched,
                                   onChanged: (value) {
-                                    // Handle switch state change
+                                    setState(() {
+                                      isSwitched = value;
+                                    });
                                   },
                                 ),
                               ],

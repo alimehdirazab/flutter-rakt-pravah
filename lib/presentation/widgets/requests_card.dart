@@ -121,56 +121,33 @@ class RequestsCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  Row(
-                    mainAxisAlignment:
-                        MainAxisAlignment.start, // Align buttons to the start
-                    children: [
-                      IconButton.outlined(
-                        onPressed: () {},
-                        icon: const Icon(
-                          Icons.keyboard_double_arrow_up_sharp,
-                          color: Colors.blueAccent,
-                        ),
-                        iconSize: 20, // Adjust icon size for better appearance
-                        style: IconButton.styleFrom(
-                          minimumSize: const Size(
-                              32, 32), // Ensure enough space for tap area
-                        ),
-                      ),
-                      const GapWidget(size: -12),
-                      IconButton.outlined(
-                        onPressed: () {},
-                        icon: const Icon(
-                          Icons.share,
-                          color: Colors.greenAccent,
-                        ),
-                        iconSize: 20,
-                        style: IconButton.styleFrom(
-                          minimumSize: const Size(32, 32),
-                        ),
-                      ),
-                      const GapWidget(
-                          size:
-                              8), // Corrected GapWidget size for proper spacing
-                      ElevatedButton(
-                        onPressed: onAcceptPressed,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          minimumSize: const Size(80, 36), // Adjust button size
-                          shape: RoundedRectangleBorder(
-                            // Add rounded corners
-                            borderRadius: BorderRadius.circular(8.0),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 16),
+                    child: Row(
+                      mainAxisAlignment:
+                          MainAxisAlignment.end, // Align buttons to the start
+                      children: [
+                        ElevatedButton(
+                          onPressed: onAcceptPressed,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            minimumSize:
+                                const Size(80, 36), // Adjust button size
+                            shape: RoundedRectangleBorder(
+                              // Add rounded corners
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                          ),
+                          child: const Text(
+                            'Accept',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
-                        child: const Text(
-                          'Accept',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ],
               ),
